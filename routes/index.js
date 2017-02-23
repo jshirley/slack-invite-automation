@@ -9,16 +9,30 @@ router.get('/', function(req, res) {
                         tokenRequired: !!config.inviteToken });
 });
 
+router.get('/s/:source', function(req, res) {
+  res.setLocale(config.locale);
+  if (!config.inviteSources[req.params.source]) {
+    return res.redirect('/');
+  }
+  res.render('index', { community: config.community,
+                        source: req.params.source,
+                        tokenRequired: !!config.inviteToken });
+});
+
 router.post('/invite', function(req, res) {
   if (req.body.email && (!config.inviteToken || (!!config.inviteToken && req.body.token === config.inviteToken))) {
+    var form = {
+      email: req.body.email,
+      token: config.slacktoken,
+      set_active: true
+    };
+    if (req.body.source && !!config.inviteSources[req.body.source]) {
+      form.channels = config.inviteSources[req.body.source];
+    }
     request.post({
         url: 'https://'+ config.slackUrl + '/api/users.admin.invite',
-        form: {
-          email: req.body.email,
-          token: config.slacktoken,
-          set_active: true
-        }
-      }, function(err, httpResponse, body) {
+        form: form
+    }, function(err, httpResponse, body) {
         // body looks like:
         //   {"ok":true}
         //       or

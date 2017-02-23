@@ -1,3 +1,18 @@
+var util = require('util');
+
+var inviteSources = {};
+if (process.env.INVITE_SOURCES) {
+  process.env.INVITE_SOURCES.split(';').forEach(function(source) {
+    var parts = source.split(':');
+    if (parts.length != 2) {
+      util.debuglog('config')('INVITE_SOURCES was specified, but had an invalid pair. Check configuration, format should be `source:channel1,channel2;source2:channel1,channel2`')
+    } else {
+      inviteSources[parts[0]] = parts[1];
+    }
+  });
+  console.log(inviteSources);
+}
+
 module.exports = {
   // your community or team name to display on join page.
   community: process.env.COMMUNITY_NAME || 'YOUR-TEAM-NAME',
@@ -15,6 +30,6 @@ module.exports = {
   slacktoken: process.env.SLACK_TOKEN || 'YOUR-ACCESS-TOKEN',
   // an optional security measure - if it is set, then that token will be required to get invited.
   inviteToken: process.env.INVITE_TOKEN || null,
-
+  inviteSources: inviteSources,
   locale: process.env.LOCALE || "en",
 };
